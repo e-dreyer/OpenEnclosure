@@ -99,6 +99,32 @@ sensor:
     name: "Enclosure Temperature Sensor"
     id: enclosure_temperature_sensor
 
+  - platform: pid
+    name: "PID Climate Result"
+    climate_id: enclosure_pid_controller
+    type: RESULT
+
+  - platform: pid
+    name: "PID Climate Error"
+    climate_id: enclosure_pid_controller
+    type: ERROR
+
+  - platform: pid
+    name: "PID Climate Proportional"
+    climate_id: enclosure_pid_controller
+    type: PROPORTIONAL
+
+  - platform: pid
+    name: "PID Climate Integral"
+    climate_id: enclosure_pid_controller
+    type: INTEGRAL
+    
+
+  - platform: pid
+    name: "PID Climate Derivative"
+    climate_id: enclosure_pid_controller
+    type: DERIVATIVE
+
 # ESPHome Output
 output:
 
