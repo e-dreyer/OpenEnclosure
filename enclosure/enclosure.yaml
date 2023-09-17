@@ -76,20 +76,28 @@ climate:
     heat_output: enclosure_dimmer # The ESPHome output
 
     control_parameters:
-      kp: 0.49460
-      ki: 0.00487
-      kd: 12.56301  
+      kp: 0.0
+      ki: 0.0
+      kd: 0.0
       output_averaging_samples: 5      # smooth the output over 5 samples
       derivative_averaging_samples: 5  # smooth the derivative value over 10 samples
     deadband_parameters:
-      threshold_high: 1.0°C       # deadband within +/-0.5°C of target_temperature
-      threshold_low: -1.0°C
+      threshold_high: 5.0°C       # deadband within +/-0.5°C of target_temperature
+      threshold_low: -5.0°C
 
     # These settings are required for correct behavior in HomeAssistant
     visual:
       min_temperature: 0 °C
       max_temperature: 65 °C
       temperature_step: 1 °C
+
+    # on_control:
+    #   - logger.log: "Control input received; configuration updated!"
+    #   - lambda: |-
+    #       if (x.get_mode() != CLIMATE_MODE_OFF) {
+    #           id(enclosure_lights).set_brightness(0.0f);
+    #           x.set_target_temperature(25.0f);
+    #       }
 
 # ESPHome sensors
 sensor:
@@ -99,6 +107,7 @@ sensor:
     name: "Enclosure Temperature Sensor"
     id: enclosure_temperature_sensor
 
+  # Show PID parameters on MQTT
   - platform: pid
     name: "PID Climate Result"
     climate_id: enclosure_pid_controller
@@ -119,7 +128,6 @@ sensor:
     climate_id: enclosure_pid_controller
     type: INTEGRAL
     
-
   - platform: pid
     name: "PID Climate Derivative"
     climate_id: enclosure_pid_controller
@@ -137,9 +145,9 @@ output:
       mode:
         input: true
       inverted: no
-    method: trailing # Found this to work
     min_power: 0.1 # Set minimum value which will trigger lights
     max_power: 0.99 # Set lower than 100% to prevent flickering
+    zero_means_zero: true
 
 # ESPHome Lights
 light:
@@ -149,3 +157,9 @@ light:
     output: enclosure_dimmer # Is controlled by the dimmer
     name: Enclosure Heating Lights
 
+button:
+  - platform: template
+    name: "PID Climate Autotune"
+    id: enclosure_pid_autotune
+    on_press:
+      - climate.pid.autotune: enclosure_pid_controller
