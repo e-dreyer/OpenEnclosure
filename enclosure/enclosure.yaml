@@ -8,8 +8,9 @@ esp32:
   framework:
     type: arduino
 
-# ESPHome Enable logging
+#ESPHome Enable logging
 logger:
+  level: INFO
 
 # OTA update settings
 ota:
@@ -52,7 +53,7 @@ mqtt:
       then:
       # Set the template sensor, this acts as a virtual sensor
       - sensor.template.publish:
-          id: enclosure_temperature_sensor
+          id: enclosure_temperature
           # Get the value from the JSON format
           state: !lambda |-
             return x["value"];
@@ -62,7 +63,7 @@ mqtt:
       then:
       # Set the PID control
       - climate.control:
-          id: enclosure_pid_controller # Climate controller
+          id: enclosure_climate # Climate controller
           mode: HEAT
           target_temperature: !lambda |-
             return x["value"];
@@ -70,17 +71,17 @@ mqtt:
 # ESPHome Climate PID control
 climate:
   - platform: pid
-    id: enclosure_pid_controller # ID of the PID controller
-    name: "PID Enclosure Lights"
-    sensor: enclosure_temperature_sensor # Sensor to use as the input
+    id: enclosure_climate # ID of the PID controller
+    name: "Enclosure PID"
+    sensor: enclosure_temperature # Sensor to use as the input
     default_target_temperature: 21°C
     heat_output: enclosure_dimmer # The ESPHome output
 
     # Control parameters calculated by autotune
     control_parameters:
-      kp: 0.27090
-      ki: 0.00087
-      kd: 52.68936
+      kp: 0.93164 #0.29030
+      ki: 0.00254 #0.00087
+      kd: 85.38509 #52.68936
       output_averaging_samples: 10      # smooth the output over 10 samples
       derivative_averaging_samples: 10  # smooth the derivative value over 10 samples
 
@@ -100,17 +101,19 @@ sensor:
 
   # This sensor acts as a virtual sensor which is updated over MQTT from Moonraker
   - platform: template
-    name: "Enclosure Temperature Sensor"
-    id: enclosure_temperature_sensor
+    name: "Temperature"
+    id: enclosure_temperature
     device_class: "temperature"
     state_class: "measurement"
     accuracy_decimals: 2
+    filters:
+      - heartbeat: 1.0s
 
   # Show PID parameters on MQTT
   - platform: pid
-    name: "PID Climate Result"
+    name: "PID Result"
     id: enclosure_pid_result
-    climate_id: enclosure_pid_controller
+    climate_id: enclosure_climate
     type: RESULT
     state_class: "measurement"
     accuracy_decimals: 2
@@ -120,36 +123,50 @@ sensor:
           - 0.0 -> 0.0
           - 100.0 -> 255.0
       # Send a heartbeat value to smooth PID output
-      - heartbeat: 0.5s
+      - heartbeat: 1.0s
+      # Sliding window to smooth the temperature
+      - sliding_window_moving_average:
+          window_size: 20
+          send_every: 20
+      # Return 0 for negative values
+      - lambda: !lambda |-
+          if (x < 0) {
+            return 0;
+          }
+          else {
+            return x;
+          }
 
   - platform: pid
-    name: "PID Climate Error"
+    name: "PID Error"
     id: enclosure_pid_error
-    climate_id: enclosure_pid_controller
+    climate_id: enclosure_climate
     type: ERROR
     state_class: "measurement"
     accuracy_decimals: 2
+    filters:
+      - heartbeat: 1.0s
 
   - platform: pid
-    name: "PID Climate Proportional"
+    name: "PID Proportional"
     id: enclosure_pid_proportional
-    climate_id: enclosure_pid_controller
+    climate_id: enclosure_climate
     type: PROPORTIONAL
     state_class: "measurement"
     accuracy_decimals: 2
 
   - platform: pid
-    name: "PID Climate Integral"
+    name: "PID Integral"
     id: enclosure_pid_integral
-    climate_id: enclosure_pid_controller
+    climate_id: enclosure_climate
     type: INTEGRAL
     state_class: "measurement"
     accuracy_decimals: 2
     
   - platform: pid
-    name: "PID Climate Derivative"
+    name: "PID Derivative"
     id: enclosure_pid_derivative
-    climate_id: enclosure_pid_controller
+    climate_id: enclosure_climate
     type: DERIVATIVE
     state_class: "measurement"
     accuracy_decimals: 2
@@ -187,4 +204,4 @@ button:
     name: "PID Climate Autotune"
     id: enclosure_pid_autotune
     on_press:
-      - climate.pid.autotune: enclosure_pid_controller
+      - climate.pid.autotune: enclosure_climate
