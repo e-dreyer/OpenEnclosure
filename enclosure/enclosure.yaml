@@ -30,7 +30,7 @@ captive_portal:
 
 # ESPHome MQTT settings
 mqtt:
-  broker: 192.168.1.59 # Broker IP
+  broker: !secret mqtt_broker # Broker IP
   username: !secret mqtt_username # Broker username
   password: !secret mqtt_password # Broker password
 
@@ -46,23 +46,24 @@ mqtt:
 
   # Subscribe to JSON format topics
   on_json_message:
-      # Get the current temperature
+
+    # Get the current temperature
     - topic: cr6semainsail/klipper/state/temperature_sensor enclosure_temperature/temperature # Topic from Moonraker Config
       then:
-        # Set the template sensor, this acts as a virtual sensor
+      # Set the template sensor, this acts as a virtual sensor
       - sensor.template.publish:
           id: enclosure_temperature_sensor
           # Get the value from the JSON format
           state: !lambda |-
             return x["value"];
     
-      # Get the temperature target
+    # Get the temperature target
     - topic: cr6semainsail/klipper/state/temperature_sensor enclosure_temperature/target # Topic from Moonraker Config
       then:
-        # Set the PID control
+      # Set the PID control
       - climate.control:
           id: enclosure_pid_controller # Climate controller
-          mode: HEAT_COOL
+          mode: HEAT
           target_temperature: !lambda |-
             return x["value"];
 
@@ -75,29 +76,24 @@ climate:
     default_target_temperature: 21°C
     heat_output: enclosure_dimmer # The ESPHome output
 
+    # Control parameters calculated by autotune
     control_parameters:
-      kp: 0.0
-      ki: 0.0
-      kd: 0.0
-      output_averaging_samples: 5      # smooth the output over 5 samples
-      derivative_averaging_samples: 5  # smooth the derivative value over 10 samples
+      kp: 0.27090
+      ki: 0.00087
+      kd: 52.68936
+      output_averaging_samples: 10      # smooth the output over 10 samples
+      derivative_averaging_samples: 10  # smooth the derivative value over 10 samples
+
+    # Set deadband to + or - 1.0°C
     deadband_parameters:
-      threshold_high: 5.0°C       # deadband within +/-0.5°C of target_temperature
-      threshold_low: -5.0°C
+      threshold_high: 1.0°C
+      threshold_low: -1.0°C
 
     # These settings are required for correct behavior in HomeAssistant
     visual:
       min_temperature: 0 °C
       max_temperature: 65 °C
       temperature_step: 1 °C
-
-    # on_control:
-    #   - logger.log: "Control input received; configuration updated!"
-    #   - lambda: |-
-    #       if (x.get_mode() != CLIMATE_MODE_OFF) {
-    #           id(enclosure_lights).set_brightness(0.0f);
-    #           x.set_target_temperature(25.0f);
-    #       }
 
 # ESPHome sensors
 sensor:
@@ -106,32 +102,57 @@ sensor:
   - platform: template
     name: "Enclosure Temperature Sensor"
     id: enclosure_temperature_sensor
+    device_class: "temperature"
+    state_class: "measurement"
+    accuracy_decimals: 2
 
   # Show PID parameters on MQTT
   - platform: pid
     name: "PID Climate Result"
+    id: enclosure_pid_result
     climate_id: enclosure_pid_controller
     type: RESULT
+    state_class: "measurement"
+    accuracy_decimals: 2
+    filters:
+      # Help scale the PID output to a value between 0 and 255
+      - calibrate_linear:
+          - 0.0 -> 0.0
+          - 100.0 -> 255.0
+      # Send a heartbeat value to smooth PID output
+      - heartbeat: 0.5s
 
   - platform: pid
     name: "PID Climate Error"
+    id: enclosure_pid_error
     climate_id: enclosure_pid_controller
     type: ERROR
+    state_class: "measurement"
+    accuracy_decimals: 2
 
   - platform: pid
     name: "PID Climate Proportional"
+    id: enclosure_pid_proportional
     climate_id: enclosure_pid_controller
     type: PROPORTIONAL
+    state_class: "measurement"
+    accuracy_decimals: 2
 
   - platform: pid
     name: "PID Climate Integral"
+    id: enclosure_pid_integral
     climate_id: enclosure_pid_controller
     type: INTEGRAL
+    state_class: "measurement"
+    accuracy_decimals: 2
     
   - platform: pid
     name: "PID Climate Derivative"
+    id: enclosure_pid_derivative
     climate_id: enclosure_pid_controller
     type: DERIVATIVE
+    state_class: "measurement"
+    accuracy_decimals: 2
 
 # ESPHome Output
 output:
@@ -140,14 +161,16 @@ output:
   - platform: ac_dimmer
     id: enclosure_dimmer
     gate_pin: GPIO12 # This is the PWM Output
+    
     zero_cross_pin:
       number: GPIO5 # The is the ZC input
       mode:
         input: true
-      inverted: no
-    min_power: 0.1 # Set minimum value which will trigger lights
-    max_power: 0.99 # Set lower than 100% to prevent flickering
-    zero_means_zero: true
+      inverted: yes
+
+    min_power: 0.0
+    max_power: 1.0
+    zero_means_zero: true # A value of zero turns the PID off
 
 # ESPHome Lights
 light:
@@ -157,7 +180,9 @@ light:
     output: enclosure_dimmer # Is controlled by the dimmer
     name: Enclosure Heating Lights
 
+# ESPHome Button
 button:
+  # Autotune functionality for the PID in HomeAssistant
   - platform: template
     name: "PID Climate Autotune"
     id: enclosure_pid_autotune
