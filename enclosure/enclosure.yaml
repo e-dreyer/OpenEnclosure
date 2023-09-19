@@ -79,16 +79,16 @@ climate:
 
     # Control parameters calculated by autotune
     control_parameters:
-      kp: 0.93164 #0.29030
-      ki: 0.00254 #0.00087
-      kd: 85.38509 #52.68936
-      output_averaging_samples: 10      # smooth the output over 10 samples
-      derivative_averaging_samples: 10  # smooth the derivative value over 10 samples
+      kp: 1.01859 #0.29030
+      ki: 0.00328 #0.00087
+      kd: 0.0 #79.04271
+      output_averaging_samples: 20      # smooth the output over 10 samples
+      derivative_averaging_samples: 20  # smooth the derivative value over 10 samples
 
     # Set deadband to + or - 1.0°C
     deadband_parameters:
-      threshold_high: 1.0°C
-      threshold_low: -1.0°C
+      threshold_high: 2.0°C
+      threshold_low: -2.0°C
 
     # These settings are required for correct behavior in HomeAssistant
     visual:
@@ -137,39 +137,40 @@ sensor:
             return x;
           }
 
-  - platform: pid
-    name: "PID Error"
-    id: enclosure_pid_error
-    climate_id: enclosure_climate
-    type: ERROR
-    state_class: "measurement"
-    accuracy_decimals: 2
-    filters:
-      - heartbeat: 1.0s
+  # Used for debugging purposes
+  # - platform: pid
+  #   name: "PID Error"
+  #   id: enclosure_pid_error
+  #   climate_id: enclosure_climate
+  #   type: ERROR
+  #   state_class: "measurement"
+  #   accuracy_decimals: 2
+  #   filters:
+  #     - heartbeat: 1.0s
 
-  - platform: pid
-    name: "PID Proportional"
-    id: enclosure_pid_proportional
-    climate_id: enclosure_climate
-    type: PROPORTIONAL
-    state_class: "measurement"
-    accuracy_decimals: 2
+  # - platform: pid
+  #   name: "PID Proportional"
+  #   id: enclosure_pid_proportional
+  #   climate_id: enclosure_climate
+  #   type: PROPORTIONAL
+  #   state_class: "measurement"
+  #   accuracy_decimals: 2
 
-  - platform: pid
-    name: "PID Integral"
-    id: enclosure_pid_integral
-    climate_id: enclosure_climate
-    type: INTEGRAL
-    state_class: "measurement"
-    accuracy_decimals: 2
+  # - platform: pid
+  #   name: "PID Integral"
+  #   id: enclosure_pid_integral
+  #   climate_id: enclosure_climate
+  #   type: INTEGRAL
+  #   state_class: "measurement"
+  #   accuracy_decimals: 2
     
-  - platform: pid
-    name: "PID Derivative"
-    id: enclosure_pid_derivative
-    climate_id: enclosure_climate
-    type: DERIVATIVE
-    state_class: "measurement"
-    accuracy_decimals: 2
+  # - platform: pid
+  #   name: "PID Derivative"
+  #   id: enclosure_pid_derivative
+  #   climate_id: enclosure_climate
+  #   type: DERIVATIVE
+  #   state_class: "measurement"
+  #   accuracy_decimals: 2
 
 # ESPHome Output
 output:
@@ -183,10 +184,11 @@ output:
       number: GPIO5 # The is the ZC input
       mode:
         input: true
-      inverted: yes
 
-    min_power: 0.0
-    max_power: 1.0
+    method: leading
+
+    min_power: 30%
+    max_power: 100%
     zero_means_zero: true # A value of zero turns the PID off
 
 # ESPHome Lights
