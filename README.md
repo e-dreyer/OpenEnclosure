@@ -1,6 +1,6 @@
 # OpenEnclosure
 
-This is my implementation for my 3D printing enclosure. Most configuration files use the extra `secret.yaml` file functionality to define
+This is my implementation for my 3D printing enclosure. Most configuration files use the extra `secrets.yaml` file functionality to define
 credentials used in the configuration
 
 ## Enclosure
