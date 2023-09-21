@@ -250,6 +250,27 @@ output:
     max_power: 100%
     zero_means_zero: true # A value of zero turns the PID off
 
+switch:
+  # Relay 1
+  - platform: gpio
+    name: relay1
+    id: enclosure_relay_1
+    pin:
+      number: 32
+      inverted: true # Start in OFF state
+    retain: true # Required to have the state to be visible to services such as Moonraker
+    command_retain: true #  Required to have the command to be visible to services such as Moonraker
+
+  # Relay 4
+  - platform: gpio
+    name: relay4
+    id: enclosure_relay_4
+    pin:
+      number: 33
+      inverted: true # Start in OFF state
+    retain: true # Required to have the state to be visible to services such as Moonraker
+    command_retain: true #  Required to have the command to be visible to services such as Moonraker
+
 # ESPHome Lights
 light:
   # This is the heating lights used in the enclosure
