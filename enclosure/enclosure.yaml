@@ -29,7 +29,7 @@ esp32:
 
 #ESPHome Enable logging
 logger:
-  level: INFO
+  level: DEBUG
 
 # OTA update settings
 ota:
@@ -79,7 +79,14 @@ wifi:
 # ESPHome Captive Portal settings
 captive_portal:
 
-# ESPHome MQTT settings
+# I2C Configuration
+i2c:
+  sda: GPIO21
+  scl: GPIO22
+  scan: true
+  id: bus_a
+
+# ESPHome MQTT settings 
 mqtt:
   # Credentials
   broker: !secret mqtt_broker # Broker IP
@@ -98,17 +105,6 @@ mqtt:
 
   # Subscribe to JSON format topics
   on_json_message:
-
-    # Get the current temperature
-    - topic: cr6semainsail/klipper/state/temperature_sensor enclosure_temperature/temperature # Topic from Moonraker Config
-      then:
-      # Set the template sensor, this acts as a virtual sensor
-      - sensor.template.publish:
-          id: enclosure_temperature_sensor
-
-          # Get the value from the JSON format
-          state: !lambda |-
-            return x["value"];
     
     # Get the temperature target
     - topic: cr6semainsail/klipper/state/temperature_sensor enclosure_temperature/target # Topic from Moonraker Config
@@ -117,6 +113,7 @@ mqtt:
       - climate.control:
           id: enclosure_heating_lights_climate # Climate controller
           mode: HEAT
+          swing_mode: BOTH
 
           target_temperature: !lambda |-
             return x["value"];
@@ -154,17 +151,6 @@ climate:
 # ESPHome sensors
 sensor:
 
-  # This sensor acts as a virtual sensor which is updated over MQTT from Moonraker
-  - platform: template
-    name: "Enclosure Temperature Sensor"
-    id: enclosure_temperature_sensor
-    device_class: "temperature"
-    state_class: "measurement"
-    accuracy_decimals: 2
-
-    filters:
-      - heartbeat: 1.0s
-
   # Show PID parameters on MQTT
   - platform: pid
     name: "Enclosure Heating Lights PID Result"
@@ -186,6 +172,9 @@ sensor:
       - sliding_window_moving_average:
           window_size: 20
           send_every: 20
+      - clamp:
+          min_value: 0
+          max_value: 255
       # Return 0 for negative values
       - lambda: !lambda |-
           if (x < 0) {
@@ -194,6 +183,44 @@ sensor:
           else {
             return x;
           }
+
+  - platform: sgp4x
+    id: air_quality_sensor
+    i2c_id: bus_a
+    address: 0x59
+    voc:
+      name: "VOC Index"
+      id: voc_index
+    compensation:
+      humidity_source: enclosure_humidity_sensor
+      temperature_source: enclosure_temperature_sensor
+
+  - platform: dht
+    model: DHT22_TYPE2
+    pin:
+      # Connected to GPI22 on the ESP32.
+      number: GPIO32
+      mode:
+        input: true
+        pullup: false
+    
+    temperature:
+      name: "Enclosure Temperature"
+      id: enclosure_temperature_sensor
+      state_class: "measurement"
+      accuracy_decimals: 2
+
+      filters:
+        - heartbeat: 1.0s
+
+    humidity:
+      name: "Enclosure Humidity"
+      id: enclosure_humidity_sensor
+      state_class: "measurement"
+      accuracy_decimals: 2
+
+      filters:
+        - heartbeat: 1.0s
 
   # Used for debugging purposes
   # - platform: pid
@@ -253,20 +280,20 @@ output:
 switch:
   # Relay 1
   - platform: gpio
-    name: relay1
+    name: "Printer Power"
     id: enclosure_relay_1
     pin:
-      number: 32
+      number: 33
       inverted: true # Start in OFF state
     retain: true # Required to have the state to be visible to services such as Moonraker
     command_retain: true #  Required to have the command to be visible to services such as Moonraker
 
   # Relay 4
   - platform: gpio
-    name: relay4
+    name: "LED Lights Power"
     id: enclosure_relay_4
     pin:
-      number: 33
+      number: 25
       inverted: true # Start in OFF state
     retain: true # Required to have the state to be visible to services such as Moonraker
     command_retain: true #  Required to have the command to be visible to services such as Moonraker
