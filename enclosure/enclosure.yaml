@@ -297,7 +297,7 @@ switch:
       inverted: false # Start in OFF state
     retain: true # Required to have the state to be visible to services such as Moonraker
     command_retain: true #  Required to have the command to be visible to services such as Moonraker
-    restore: RESTORE_DEFAULT_OFF # Attempt to restore state but default to OFF
+    restore_mode: RESTORE_DEFAULT_OFF # Attempt to restore_mode state but default to OFF
 
   # Relay 4
   - platform: gpio
@@ -308,7 +308,7 @@ switch:
       inverted: false # Start in OFF state
     retain: true # Required to have the state to be visible to services such as Moonraker
     command_retain: true #  Required to have the command to be visible to services such as Moonraker
-    restore: RESTORE_DEFAULT_OFF # Attempt to restore state but default to OFF
+    restore_mode: RESTORE_DEFAULT_OFF # Attempt to restore_mode state but default to OFF
 
 # ESPHome Lights
 light:
