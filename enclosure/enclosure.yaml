@@ -85,6 +85,7 @@ i2c:
   scl: GPIO22
   scan: true
   id: bus_a
+  frequency: 1kHz
 
 # ESPHome MQTT settings 
 mqtt:
@@ -134,8 +135,8 @@ climate:
       ki: 0.00328 #0.00087
       kd: 0.0 #79.04271
 
-      output_averaging_samples: 20      # smooth the output over 10 samples
-      derivative_averaging_samples: 20  # smooth the derivative value over 10 samples
+      output_averaging_samples: 30      # smooth the output over 10 samples
+      derivative_averaging_samples: 30  # smooth the derivative value over 10 samples
 
     # Set deadband to + or - 1.0°C
     deadband_parameters:
@@ -170,8 +171,8 @@ sensor:
       - heartbeat: 1.0s
       # Sliding window to smooth the temperature
       - sliding_window_moving_average:
-          window_size: 20
-          send_every: 20
+          window_size: 30
+          send_every: 30
       - clamp:
           min_value: 0
           max_value: 255
@@ -184,6 +185,7 @@ sensor:
             return x;
           }
 
+    # ESP Home Documentation: https://esphome.io/components/sensor/sgp4x
   - platform: sgp4x
     id: air_quality_sensor
     i2c_id: bus_a
@@ -191,10 +193,18 @@ sensor:
     voc:
       name: "VOC Index"
       id: voc_index
+      algorithm_tuning:
+        index_offset: 200
+        learning_time_offset_hours: 72
+        learning_time_gain_hours: 72
+        gating_max_duration_minutes: 0
+        std_initial: 50
+        gain_factor: 230
     compensation:
       humidity_source: enclosure_humidity_sensor
       temperature_source: enclosure_temperature_sensor
-
+    update_interval: 30s
+    
   - platform: dht
     model: DHT22_TYPE2
     pin:
@@ -208,7 +218,7 @@ sensor:
       name: "Enclosure Temperature"
       id: enclosure_temperature_sensor
       state_class: "measurement"
-      accuracy_decimals: 2
+      accuracy_decimals: 1
 
       filters:
         - heartbeat: 1.0s
@@ -217,45 +227,45 @@ sensor:
       name: "Enclosure Humidity"
       id: enclosure_humidity_sensor
       state_class: "measurement"
-      accuracy_decimals: 2
+      accuracy_decimals: 1
 
       filters:
         - heartbeat: 1.0s
 
   # Used for debugging purposes
-  # - platform: pid
-  #   name: "Enclosure Heating Lights PID Error"
-  #   id: enclosure_heating_lights_pid_error
-  #   climate_id: enclosure_heating_lights_climate
-  #   type: ERROR
-  #   state_class: "measurement"
-  #   accuracy_decimals: 2
-  #   filters:
-  #     - heartbeat: 1.0s
+  - platform: pid
+    name: "Enclosure Heating Lights PID Error"
+    id: enclosure_heating_lights_pid_error
+    climate_id: enclosure_heating_lights_climate
+    type: ERROR
+    state_class: "measurement"
+    accuracy_decimals: 1
+    filters:
+      - heartbeat: 1.0s
 
-  # - platform: pid
-  #   name: "Enclosure Heating Lights PID Proportional"
-  #   id: enclosure_heating_lights_pid_proportional
-  #   climate_id: enclosure_heating_lights_climate
-  #   type: PROPORTIONAL
-  #   state_class: "measurement"
-  #   accuracy_decimals: 2
+  - platform: pid
+    name: "Enclosure Heating Lights PID Proportional"
+    id: enclosure_heating_lights_pid_proportional
+    climate_id: enclosure_heating_lights_climate
+    type: PROPORTIONAL
+    state_class: "measurement"
+    accuracy_decimals: 1
 
-  # - platform: pid
-  #   name: "Enclosure Heating Lights PID Integral"
-  #   id: enclosure_heating_lights_pid_integral
-  #   climate_id: enclosure_heating_lights_climate
-  #   type: INTEGRAL
-  #   state_class: "measurement"
-  #   accuracy_decimals: 2
+  - platform: pid
+    name: "Enclosure Heating Lights PID Integral"
+    id: enclosure_heating_lights_pid_integral
+    climate_id: enclosure_heating_lights_climate
+    type: INTEGRAL
+    state_class: "measurement"
+    accuracy_decimals: 1
     
-  # - platform: pid
-  #   name: "Enclosure Heating Lights PID Derivative"
-  #   id: enclosure_heating_lights_pid_derivative
-  #   climate_id: enclosure_heating_lights_climate
-  #   type: DERIVATIVE
-  #   state_class: "measurement"
-  #   accuracy_decimals: 2
+  - platform: pid
+    name: "Enclosure Heating Lights PID Derivative"
+    id: enclosure_heating_lights_pid_derivative
+    climate_id: enclosure_heating_lights_climate
+    type: DERIVATIVE
+    state_class: "measurement"
+    accuracy_decimals: 1
 
 # ESPHome Output
 output:
@@ -273,7 +283,7 @@ output:
 
     method: leading
 
-    min_power: 30%
+    min_power: 10%
     max_power: 100%
     zero_means_zero: true # A value of zero turns the PID off
 
@@ -284,9 +294,10 @@ switch:
     id: enclosure_relay_1
     pin:
       number: 33
-      inverted: true # Start in OFF state
+      inverted: false # Start in OFF state
     retain: true # Required to have the state to be visible to services such as Moonraker
     command_retain: true #  Required to have the command to be visible to services such as Moonraker
+    restore: RESTORE_DEFAULT_OFF # Attempt to restore state but default to OFF
 
   # Relay 4
   - platform: gpio
@@ -294,9 +305,10 @@ switch:
     id: enclosure_relay_4
     pin:
       number: 25
-      inverted: true # Start in OFF state
+      inverted: false # Start in OFF state
     retain: true # Required to have the state to be visible to services such as Moonraker
     command_retain: true #  Required to have the command to be visible to services such as Moonraker
+    restore: RESTORE_DEFAULT_OFF # Attempt to restore state but default to OFF
 
 # ESPHome Lights
 light:
