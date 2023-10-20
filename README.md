@@ -613,23 +613,23 @@ Here you need to change a few things:
 
 Now we are ready to flash the `firmware` to the `ESP32`. First start by opening the bottom panel on the side of the enclosure. The panel should look like this.
 
-![Closed enclosure side panel](https://github.com/e-dreyer/OpenEnclosure/blob/main/Images/enclosure_case_closed.png?raw=true)
+![Closed enclosure side panel](https://github.com/e-dreyer/OpenEnclosure/blob/main/Images/enclosure_case_closed.jpg?raw=true)
 
 Open the enclosure by pulling of the top panel, it should look something like this:
 
-![Opened enclosure side panel](https://github.com/e-dreyer/OpenEnclosure/blob/main/Images/enclosure_powered_on.png?raw=true)
+![Opened enclosure side panel](https://github.com/e-dreyer/OpenEnclosure/blob/main/Images/enclosure_powered_on.jpg?raw=true)
 
 Ensure that the enclosure is not powered on, this can be notices by the LCD display and lights not be powered on. You can achieve this by disconnecting the main AC plug of the enclosure
 
-![Powered off enclosure side panel](https://github.com/e-dreyer/OpenEnclosure/blob/main/Images/enclosure_powered_off.png?raw=true)
+![Powered off enclosure side panel](https://github.com/e-dreyer/OpenEnclosure/blob/main/Images/enclosure_powered_off.jpg?raw=true)
 
 Note the orientation of the `ESP32` in the enclosure. Carefully disconnect it by pulling it out of the enclosure. Be sure to hold on to the back panel which the `ESP32` is mounted on, as it can also be removed to reveal the wiring of the `ESP32`:
 
-![ESP32 mounting orientation](https://github.com/e-dreyer/OpenEnclosure/blob/main/Images/esp_mounting_orientation.png?raw=true)
+![ESP32 mounting orientation](https://github.com/e-dreyer/OpenEnclosure/blob/main/Images/esp_mounting_orientation.jpg?raw=true)
 
 Unplug the `USB` cable from the front of the printer if it is connected and connect the `ESP32` to the `Raspberry Pi`:
 
-![ESP32 connected to printer](https://github.com/e-dreyer/OpenEnclosure/blob/main/Images/esp_connected_to_usb.png?raw=true)
+![ESP32 connected to printer](https://github.com/e-dreyer/OpenEnclosure/blob/main/Images/esp_connected_to_usb.jpg?raw=true)
 
 Power on the enclosure, by connecting the AC plug again and wait for the `Raspberry Pi` to boot. After a few minutes you can `SSH` into the `Raspberry Pi` again, or use an externally connected monitor, this is your choice.
 
