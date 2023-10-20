@@ -39,6 +39,14 @@ sudo apt install rpi-imager
 8. Click `Write`. If prompted to format the `SD card` click `yes`.
 9. Wait for the installation to complete. This might take a few minutes depending on internet speed and the write speed of the `SD card`
 
+![Home screen of RPI imager](https://github.com/e-dreyer/OpenEnclosure/blob/main/Images/rpi_imager_1.png?raw=true)
+
+![Selecting the image category](https://github.com/e-dreyer/OpenEnclosure/blob/main/Images/rpi_imager_2.png?raw=true)
+
+![Selecting 3D printing menu](https://github.com/e-dreyer/OpenEnclosure/blob/main/Images/rpi_imager_3.png?raw=true)
+
+![Selecting MainsailOS](https://github.com/e-dreyer/OpenEnclosure/blob/main/Images/rpi_imager_4.png?raw=true)
+
 Remove the `SD card` from the computer and insert it into the `Raspberry Pi`. Connect the `Raspberry Pi` to an HDMI monitor and a keyboard and finally connect the power. Wait for the `Raspberry Pi` to boot. Ensure that your `WiFi dongle` is plugged into the `Raspberry Pi`.
 
 ### Setting up WiFi, SSH and static IP
@@ -225,6 +233,8 @@ You will then be presented with a menu similar to the the menu you used when we 
 
 Once again use the `arrow keys` to move down and select `STMicroelectornics STM32` and press `enter`. Select `processor model "STM32F103" (is the default)`, set `Bootloader offset` to `Bootloader - "28KiB"` and `Communication interface` to `Serial (on USART1 PA10/PA9)`. If you get stuck, a great guide can be found [here](https://github.com/KoenVanduffel/CR-6_Klipper). Otherwise, there is also this guide on [Reddit](https://www.reddit.com/r/CR6/comments/jdil9t/klipper_for_the_cr6/).
 
+![Menuconfig for the CR6SE](https://github.com/e-dreyer/OpenEnclosure/blob/main/Images/klipper_cr6se_menuconfig.png?raw=true)
+
 Press `shift+q` and press `shift+y` to save the settings. This will save the config which we want to use for building our firmware. Once back in the terminal, enter the following command to build the firmware for your printer. This might take a few minutes and the terminal may scroll automatically with a lot of logs and information regarding the build:
 
 ```bash
@@ -258,7 +268,7 @@ make menuconfig
 
 In the menu, set `Microcontroller Architecture` to `Linux process` then save and exit. Finally, we can flash it to the `Raspberry Pi`:
 
-![Menuconfig for the Linux Process](https://github.com/e-dreyer/OpenEnclosure/blob/main/images/linux_process_menuconfig.png?raw=true)
+![Menuconfig for the Linux Process](https://github.com/e-dreyer/OpenEnclosure/blob/main/Images/linux_process_menuconfig.png?raw=true)
 
 ```bash
 sudo service klipper stop
@@ -311,13 +321,33 @@ Using the following command, you will be able to see all of the files in this re
 ls
 ```
 
-Now let's copy some of these files over to the correct `Klipper` directories to configure your `Klipper` installation. Start by running these commands:
+Now let's copy some of these files over to the correct `Klipper` directories to configure your `Klipper` installation. Let's first navigate back to the `root` directory to make things easier:
+
+```bash
+cd ~
+```
+
+Now we want to copy all of the config files to the correct `Klipper` directory. This command copies all of the files in `OpenEnclosure/configurations/config` to `printer_data/config` on the `Raspberry Pi` and the `-r` flag specifies this operation to be recursive to ensure that all sub folders and files are also copied over:
+
+```bash
+cp -r OpenEnclosure/configurations/config/* printer_data/config/
+```
+
+Finally, we just need to copy over some files which are used to store `passwords` and other configurations:
+
+```bash
+cp OpenEnclosure/configurations/moonraker.asvc printer_data/
+```
+
+```bash
+cp OpenEnclosure/configurations/moonraker.secrets printer_data/
+```
 
 We are almost done, we only have two more systems to install, then we can start printing!
 
 ## MQTT Broker
 
-Next we need to install an `MQTT Broker` on the `Raspberry Pi`. `MQTT` is a communication protocol often used by `Internet-of-things` or `IOT` devices and is similar to the `http://...` or `https://...` you se before website `urls`, but specifically made for devices such as printers and the enclosure. A `MQTT Broker` can be seen as a server and allows other devices to talk to each other over this server. In this case, a `MQTT Broker` will be hosted on the `Raspberry Pi` and the `ESP32` of the enclosure and the `Moonraker API` we installed along side `Klipper` in the first section will talk to each other. This setup is far easier than it sounds and also involves only a few terminal commands.
+Next we need to install an `MQTT Broker` on the `Raspberry Pi`. `MQTT` is a communication protocol often used by `Internet-of-things` or `IOT` devices and is similar to the `http://...` or `https://...` you see before website `urls`, but specifically made for devices such as printers and the enclosure. A `MQTT Broker` can be seen as a server and allows other devices to talk to each other over this server. In this case, a `MQTT Broker` will be hosted on the `Raspberry Pi` and the `ESP32` of the enclosure and the `Moonraker API` we installed along side `Klipper` in the first section will talk to each other. This setup is far easier than it sounds and also involves only a few terminal commands.
 
 [Here](https://randomnerdtutorials.com/how-to-install-mosquitto-broker-on-raspberry-pi/) you can find an easy tutorial to install the `Mosquitto MQTT Broker`, but it will also be explained below. First we need to update the `Raspberry Pi`. This will allow it to have the latest versions of the software. You can do this by running the following command. While this command is running, you might be prompted to confirm certain software installations by pressing `shift+Y` to confirm `yes`. Also, initially you will be prompted for you password as the `sudo` keyword is used. This is the `password` of the `Raspberry Pi`, in this guide we previously defined it as `root`
 
@@ -424,6 +454,22 @@ It is now a good time for us to restart the `Raspberry Pi` to save all of these 
 reboot
 ```
 
+Finally, we just need to set this `username` and `password` for `Moonraker`, let's open the `moonraker.secrets` file to do this. If you are not in the `root` directory, start by going to the root directory with `cd ~` and then open the file with:
+
+```bash
+nano printer_data/moonraker.secrets
+```
+
+You'll be presented with a file, similar to this following output. Change the `username` and `password` to the values you configured for your `MQTT Broker`:
+
+```bash
+[mqtt_credentials]
+username: mainsail
+password: root
+```
+
+To save, we press `ctrl+x`, `ctrl+y` and then press `enter` as we did in the previous sections to exit the `nano` text editor.
+
 We are now ready for the last section of this installation and then we can start printing!
 
 ## Enclosure and ESP32
@@ -444,6 +490,182 @@ First we need to install `ESP Home` on the `Raspberry Pi`, which would allow us 
 ```bash
 cd ~
 ```
+
+And then we want to move to the `OpenEnclosure` folder we cloned in the previous sections. If you have not done this before, first `clone` this repository:
+
+```bash
+git clone https://github.com/e-dreyer/OpenEnclosure.git
+```
+
+Otherwise, simply move to the `OpenEnclosure` directory from the `root` directory with:
+
+```bash
+cd OpenEnclosure
+```
+
+First we want to make sure `Python` is installed, you can easily verify this with:
+
+```bash
+python --version
+```
+
+You should see something like this, as it would have been installed alongside `Klipper` and `MainsailOS`
+
+```bash
+pi@mainsail:~ $ python --version
+Python 3.9.2
+```
+
+Then we are ready to install `ESP Home`, you can do this by running the following two commands. Please note, after entering these commands separately and pressing `enter`, the terminal might not immediately output anything and it might appear as if nothing is happening. Please wait about `30 seconds` as output will soon start to appear.
+
+This process can also be found in the official documentation of `ESP Home` [here](https://esphome.io/guides/installing_esphome).
+
+First ensure that `Python virtual environments` are installed by running:
+
+```bash
+sudo apt-get install python3-venv
+```
+
+Then we create the virtual environment
+
+```bash
+python3 -m venv venv
+```
+
+And we activate the virtual environment with:
+
+```bash
+source venv/bin/activate
+```
+
+Please not that after activating the `virtual environment` your terminal will change and look like this:
+
+```bash
+(venv) pi@mainsail:~/OpenEnclosure $ 
+```
+
+The reason for this is we are using `Python virtual environments` which allows for isolated control over dependencies. Finally, we install `ESP Home` with:
+
+```bash
+pip3 install esphome
+```
+
+You can verify that this was successful with the following command:
+
+```bash
+esphome version
+```
+
+You should see something like this:
+
+```bash
+(venv) pi@mainsail:~/OpenEnclosure $ esphome version
+Version: 2023.10.1
+```
+
+Awesome! Let's install the `firmware` to the `ESP32`. Let's start by moving to the correct directory with:
+
+```bash
+cd enclosure
+```
+
+In this folder we have a few files, the two important ones are `enclosure.yaml` and `secrets.yaml`. The `enclosure.yaml` file contains the entire configuration for the `firmware`. This file allows us to program the `firmware` with a simple configuration file. If you look at this file, you will see that it defines different `pins` and `behaviors` for the `ESP32`. Finally, we have the `secrets.yaml` file, which contains our credentials and other parameters. Let's open this file to edit it:
+
+```bash
+nano secrets.yaml
+```
+
+You should see something like this:
+
+```bash
+wifi_ssid: YOUR_WIFI_SSID
+wifi_password: YOUR_WIFI_PASSWORD
+wifi_ip: 192.168.1.74 # Your static IP for your ESP32
+wifi_gateway: 192.168.1.1 # Your default gateway, this is the <router ip> we got in a previous section
+wifi_subnet: 255.255.255.0 # Your subnet mask, this is almost always 255.255.255.0
+
+ap_ssid: enclosure 
+ap_password: password 
+
+ota_password: password 
+
+mqtt_broker: 192.168.1.59 # This is the IP of your Raspberry Pi
+mqtt_username: mainsail # This is your MQTT username
+mqtt_password: root # This is your MQTT password
+```
+
+Here you need to change a few things:
+
+- You need to change `YOUR_WIFI_SSID` to the name of your `WiFi` network, similar to how we connected the `Raspberry Pi` to your `WiFi`.
+- You also need to change and set the `YOUR_WIFI_PASSWORD` to the `password` of your `WiFi` network.
+- `wifi_ip` will be the `ip address` that you want for the `ESP32`, similar to how we set the `static ip` of the `Raspberry Pi`, you need to chose an `ip address` for the `ESP32`.
+- `wifi_gateway` will be the same as the `<router ip>` we found in the previous section
+- `wifi_subnet` is the `subnet mask` of your router. For most users this will always be `255.255.255.0`.
+
+- `ap_ssid` is the name for a `hotspot` the `ESP32` can create. If the `ESP32` is unable to connect to a `WiFi` network, it will create its own `access point` and you will be able to connect to it and set the `ssid` and `password` in your browser.
+- `ap_password` will be the `password` of this `hotspot` which the `ESP32` creates.
+
+- `ota_password` is the password which `esp_home` on the `Raspberry Pi` can use to update the `ESP32` over the network, thus eliminating the need for a `USB` cable in the future.
+
+- `mqtt_broker` needs to be the `ip address` of the `Raspberry Pi`. You can find this by using the `ifconfig` command in the terminal of the `Raspberry Pi`, similar to how we did it in previous sections of the guide.
+- `mqtt_username` is the username you used for your `MQTT Broker` from the previous section.
+- Finally, `mqtt_password` is the `password` for your `MQTT Broker` from the previous section.
+
+Now we are ready to flash the `firmware` to the `ESP32`. First start by opening the bottom panel on the side of the enclosure. The panel should look like this.
+
+![Closed enclosure side panel](https://github.com/e-dreyer/OpenEnclosure/blob/main/Images/enclosure_case_closed.png?raw=true)
+
+Open the enclosure by pulling of the top panel, it should look something like this:
+
+![Opened enclosure side panel](https://github.com/e-dreyer/OpenEnclosure/blob/main/Images/enclosure_powered_on.png?raw=true)
+
+Ensure that the enclosure is not powered on, this can be notices by the LCD display and lights not be powered on. You can achieve this by disconnecting the main AC plug of the enclosure
+
+![Powered off enclosure side panel](https://github.com/e-dreyer/OpenEnclosure/blob/main/Images/enclosure_powered_off.png?raw=true)
+
+Note the orientation of the `ESP32` in the enclosure. Carefully disconnect it by pulling it out of the enclosure. Be sure to hold on to the back panel which the `ESP32` is mounted on, as it can also be removed to reveal the wiring of the `ESP32`:
+
+![ESP32 mounting orientation](https://github.com/e-dreyer/OpenEnclosure/blob/main/Images/esp_mounting_orientation.png?raw=true)
+
+Unplug the `USB` cable from the front of the printer if it is connected and connect the `ESP32` to the `Raspberry Pi`:
+
+![ESP32 connected to printer](https://github.com/e-dreyer/OpenEnclosure/blob/main/Images/esp_connected_to_usb.png?raw=true)
+
+Power on the enclosure, by connecting the AC plug again and wait for the `Raspberry Pi` to boot. After a few minutes you can `SSH` into the `Raspberry Pi` again, or use an externally connected monitor, this is your choice.
+
+Once back in the terminal of the `Raspberry Pi`, let's go back to the directory of the `ESP Home` config, with the following commands
+
+```bash
+cd ~
+cd OpenEnclosure
+```
+
+Now we first need to activate the `Python virtual environment` again with the following command:
+
+```bash
+source venv/bin/activate
+```
+
+Please not that after activating the `virtual environment` your terminal will change and look like this:
+
+```bash
+(venv) pi@mainsail:~/OpenEnclosure $ 
+```
+
+Now we can move to the directory of the `.yaml` config file:
+
+```bash
+cd enclosure
+```
+
+Now we can upload the `firmware` to the `ESP32` with the following command:
+
+```bash
+esphome run enclosure.yaml
+```
+
+
+
 
 ### ESP Home
 
