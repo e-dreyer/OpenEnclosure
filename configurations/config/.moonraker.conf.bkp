@@ -1,0 +1,162 @@
+[update_manager octoeverywhere]
+type = git_repo
+channel = beta
+path = /home/erikd/octoeverywhere
+origin = https://github.com/QuinnDamerell/OctoPrint-OctoEverywhere.git
+env = /home/erikd/octoeverywhere-env/bin/python
+requirements = requirements.txt
+install_script = install.sh
+managed_services = 
+	octoeverywhere
+
+[announcements]
+subscriptions = 
+	octoeverywhere
+
+[octoprint_compat]
+
+[history]
+
+[zeroconf]
+
+[server]
+host = 0.0.0.0
+port = 7125
+klippy_uds_address = /home/erikd/printer_data/comms/klippy.sock
+
+[mqtt]
+address = 0.0.0.0
+port = 1883
+username = {secrets.mqtt_credentials.username}
+password = {secrets.mqtt_credentials.password}
+instance_name = cr6semainsail
+enable_moonraker_api = True
+default_qos = 0
+mqtt_protocol = v3.1.1
+status_objects = 
+	sensor enclosure_temperature_sensor
+	sensor enclosure_humidity_sensor
+	extruder
+	heater_bed
+	filament_switch_sensor
+	print_time
+	estimated_print_time
+	print_stats
+	virtual_sdcard
+	filament_switch_sensor filament_sensor
+publish_split_status = True
+
+[file_manager]
+enable_object_processing = True
+
+[authorization]
+trusted_clients = 
+	10.0.0.0/8
+	127.0.0.0/8
+	169.254.0.0/16
+	172.16.0.0/12
+	192.168.0.0/16
+	FE80::/10
+	::1/128
+cors_domains = 
+	*.lan
+	*.local
+	*://localhost
+	*://localhost:*
+	*://my.mainsail.xyz
+	*://app.fluidd.xyz
+
+[update_manager]
+channel = dev
+refresh_interval = 168
+
+[update_manager mainsail-config]
+type = git_repo
+primary_branch = master
+path = ~/mainsail-config
+origin = https://github.com/mainsail-crew/mainsail-config.git
+managed_services = klipper
+
+[update_manager mainsail]
+type = web
+channel = stable
+repo = mainsail-crew/mainsail
+path = ~/mainsail
+
+[update_manager klipper-macros]
+type = git_repo
+origin = https://github.com/jschuh/klipper-macros.git
+path = ~/printer_data/config/klipper-macros
+primary_branch = main
+is_system_service = False
+managed_services = klipper
+
+[update_manager mobileraker]
+type = git_repo
+path = ~/mobileraker_companion
+origin = https://github.com/Clon1998/mobileraker_companion.git
+primary_branch = main
+managed_services = mobileraker
+env = ~/mobileraker-env/bin/python
+requirements = scripts/mobileraker-requirements.txt
+install_script = scripts/install-mobileraker-companion.sh
+
+[data_store]
+temperature_store_size = 1200
+gcode_store_size = 1000
+
+[webcam main_webcam]
+location = printer
+service = mjpegstreamer
+target_fps = 10
+stream_url = /webcam/?action=stream
+snapshot_url = /webcam/?action=snapshot
+flip_horizontal = False
+flip_vertical = False
+rotation = 0
+
+[sensor enclosure_temperature_sensor]
+type = mqtt
+name = enclosure_temperature_sensor
+state_topic = enclosure/sensor/enclosure_temperature/state
+
+[sensor enclosure_humidity_sensor]
+type = mqtt
+name = enclosure_humidity_sensor
+state_topic = enclosure/sensor/enclosure_humidity/state
+
+[power printer]
+type = mqtt
+command_topic = enclosure/switch/printer_power/command
+command_payload = 
+	{% if command == "on" %}
+	ON
+	{% else %}
+	OFF
+	{% endif %}
+retain_command_state = True
+query_topic = enclosure/switch/printer_power/command
+state_topic = enclosure/switch/printer_power/state
+state_response_template = 
+	{payload}
+query_after_command = True
+bound_services = klipper
+locked_while_printing = True
+restart_klipper_when_powered = True
+
+[power enclosure_lights]
+type = mqtt
+command_topic = enclosure/switch/led_lights_power/command
+command_payload = 
+	{% if command == "on" %}
+	ON
+	{% else %}
+	OFF
+	{% endif %}
+retain_command_state = True
+query_topic = enclosure/switch/led_lights_power/command
+state_topic = enclosure/switch/led_lights_power/state
+state_response_template = 
+	{payload}
+query_after_command = True
+
