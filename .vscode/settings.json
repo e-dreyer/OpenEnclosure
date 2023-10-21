@@ -5,9 +5,15 @@
         "devkit",
         "esphome",
         "GPIO",
+        "imager",
         "klipper",
         "MQTT",
+        "raspberrypi",
+        "raspi",
+        "rfkill",
         "semainsail",
-        "Triac"
+        "Triac",
+        "txqueuelen",
+        "wlan"
     ]
 }
