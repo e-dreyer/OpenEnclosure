@@ -627,7 +627,7 @@ Note the orientation of the `ESP32` in the enclosure. Carefully disconnect it by
 
 ![ESP32 mounting orientation](https://github.com/e-dreyer/OpenEnclosure/blob/main/Images/esp_mounting_orientation.jpg?raw=true)
 
-Unplug the `USB` cable from the front of the printer if it is connected and connect the `ESP32` to the `Raspberry Pi`:
+Connect the `ESP32` with a `USB` cable to the `Raspberry Pi`. Preferably not the `USB` cable used to connect the printer, as it does not provide power to the `ESP32` and the red `LED` on the `ESP32` will not turn on when plugged in:
 
 ![ESP32 connected to printer](https://github.com/e-dreyer/OpenEnclosure/blob/main/Images/esp_connected_to_usb.jpg?raw=true)
 
@@ -664,14 +664,136 @@ Now we can upload the `firmware` to the `ESP32` with the following command:
 esphome run enclosure.yaml
 ```
 
+This will run for a while as it is possible that you might not have all the required dependencies the first time you run this command. This can easily take about `10` to `15` minutes the first time you run it.
 
+After this command has run for a while, you will be presented with the following prompt:
 
+```bash
+INFO Successfully compiled program.
+Found multiple options for uploading, please choose one:
+  [1] /dev/ttyUSB0 (CP2102 USB to UART Bridge Controller - CP2102 USB to UART Bridge Controller)
+  [2] Over The Air (192.168.1.74)
+(number): 
+```
 
-### ESP Home
+This gives us 1 of 2 options. The first option is to flash the `firmware` over the `USB` cable, while second option is for `OTA` or `Over-the-air updates` which allows us to update the `ESP32` over `WiFi`. As the `ESP32` is not yet connected to the `WiFi` network, we will press `1` and then `enter`.
+
+The output should look something like this:
+
+```bash
+INFO Successfully compiled program.
+Found multiple options for uploading, please choose one:
+  [1] /dev/ttyUSB0 (CP2102 USB to UART Bridge Controller - CP2102 USB to UART Bridge Controller)
+  [2] Over The Air (192.168.1.74)
+(number): 1
+esptool.py v4.6.2
+Serial port /dev/ttyUSB0
+Connecting....
+Chip is ESP32-D0WD (revision v1.0)
+Features: WiFi, BT, Dual Core, 240MHz, VRef calibration in efuse, Coding Scheme None
+Crystal is 40MHz
+MAC: 8c:aa:b5:a2:a0:04
+Uploading stub...
+Running stub...
+Stub running...
+Changing baud rate to 460800
+Changed.
+Configuring flash size...
+Auto-detected Flash size: 4MB
+Flash will be erased from 0x00010000 to 0x0011dfff...
+Flash will be erased from 0x00001000 to 0x00005fff...
+Flash will be erased from 0x00008000 to 0x00008fff...
+Flash will be erased from 0x0000e000 to 0x0000ffff...
+Compressed 1103120 bytes to 718365...
+Wrote 1103120 bytes (718365 compressed) at 0x00010000 in 17.3 seconds (effective 510.6 kbit/s)...
+Hash of data verified.
+Compressed 17440 bytes to 12128...
+Wrote 17440 bytes (12128 compressed) at 0x00001000 in 0.6 seconds (effective 235.6 kbit/s)...
+Hash of data verified.
+Compressed 3072 bytes to 144...
+Wrote 3072 bytes (144 compressed) at 0x00008000 in 0.1 seconds (effective 330.8 kbit/s)...
+Hash of data verified.
+Compressed 8192 bytes to 47...
+Wrote 8192 bytes (47 compressed) at 0x0000e000 in 0.1 seconds (effective 463.2 kbit/s)...
+Hash of data verified.
+
+Leaving...
+Hard resetting via RTS pin...
+INFO Successfully uploaded program.
+INFO Starting log output from /dev/ttyUSB0 with baud rate 115200
+```
+
+After this process has been completed, you will start to see `logging` and other information from the `ESP32`, which verifies that flashing the `firmware` was successful and it has successfully connected to the `MQTT Broker` on the `Raspberry Pi`. You might however notice some errors, this will be due to the `ESP32` not being connected to the sensors in the enclosure, so you can ignore them for now:
+
+```bash
+INFO Successfully uploaded program.
+INFO Starting log output from /dev/ttyUSB0 with baud rate 115200
+[11:17:03][I][logger:271]: Log initialized
+[11:17:03][C][ota:473]: There have been 0 suspected unsuccessful boot attempts.
+[11:17:03][D][esp32.preferences:114]: Saving 1 preferences to flash...
+[11:17:03][D][esp32.preferences:143]: Saving 1 preferences to flash: 0 cached, 1 written, 0 failed
+[11:17:03][I][app:029]: Running through setup()...
+[11:17:03][I][i2c.arduino:183]: Performing I2C bus recovery
+[11:17:03][C][switch.gpio:011]: Setting up GPIO Switch 'Printer Power'...
+[11:17:03][D][switch:016]: 'Printer Power' Turning OFF.
+[11:17:03][D][switch:055]: 'Printer Power': Sending state OFF
+[11:17:03][D][switch:016]: 'Printer Power' Turning OFF.
+[11:17:03][C][switch.gpio:011]: Setting up GPIO Switch 'LED Lights Power'...
+[11:17:03][D][switch:016]: 'LED Lights Power' Turning OFF.
+[11:17:03][D][switch:055]: 'LED Lights Power': Sending state OFF
+[11:17:03][D][switch:016]: 'LED Lights Power' Turning OFF.
+[11:17:03][C][light:035]: Setting up light 'Enclosure Heating Lights'...
+[11:17:03][D][light:036]: 'Enclosure Heating Lights' Setting:
+[11:17:03][D][light:041]:   Color mode: 
+[11:17:03][D][light:085]:   Transition length: 1.0s
+[11:17:03][D][main:409]: Booting
+[11:17:03][D][light:036]: 'Enclosure Heating Lights' Setting:
+[11:17:03][D][light:085]:   Transition length: 1.0s
+[11:17:03][D][climate:011]: 'Enclosure Heating Lights Climate' - Setting
+[11:17:03][D][climate:015]:   Mode: HEAT
+[11:17:03][D][climate:040]:   Target Temperature: 0.00
+[11:17:03][D][climate:378]: 'Enclosure Heating Lights Climate' - Sending state:
+[11:17:03][D][climate:381]:   Mode: HEAT
+[11:17:03][D][climate:383]:   Action: OFF
+[11:17:03][D][climate:401]:   Current Temperature: nan°C
+[11:17:03][D][climate:407]:   Target Temperature: 0.00°C
+[11:17:03][C][sgp4x:012]: Setting up SGP4x...
+[11:17:03][E][sensirion_i2c:085]: Failed to write i2c register=0x3682 (2) err=2,
+[11:17:03][E][sgp4x:017]: Failed to read serial number
+[11:17:03][E][component:113]: Component sgp4x.sensor was marked as failed.
+[11:17:03][C][dht:011]: Setting up DHT...
+[11:17:03][D][sensor:094]: 'Enclosure Heating Lights PID Proportional': Sending state 0.00000 % with 1 decimals of accuracy
+[11:17:03][D][sensor:094]: 'Enclosure Heating Lights PID Integral': Sending state 0.00000 % with 1 decimals of accuracy
+[11:17:03][D][sensor:094]: 'Enclosure Heating Lights PID Derivative': Sending state 0.00000 % with 1 decimals of accuracy
+[11:17:03][C][wifi:038]: Setting up WiFi...
+[11:17:03][C][wifi:051]: Starting WiFi...
+[11:17:03][C][wifi:052]:   Local MAC: 8C:AA:B5:A2:A0:04
+[11:17:03][D][wifi:428]: Starting scan...
+[11:17:03][W][dht:169]: Requesting data from DHT failed!
+[11:17:03][W][dht:060]: Invalid readings! Please check your wiring (pull-up resistor, pin number).
+[11:17:03][D][esp32.preferences:114]: Saving 3 preferences to flash...
+[11:17:03][D][esp32.preferences:143]: Saving 3 preferences to flash: 3 cached, 0 written, 0 failed
+[11:17:03][D][sensor:094]: 'Enclosure Heating Lights PID Error': Sending state 0.00000 % with 1 decimals of accuracy
+[11:17:03][D][sensor:094]: 'Enclosure Temperature': Sending state nan °C with 1 decimals of accuracy
+[11:17:03][D][sensor:094]: 'Enclosure Heating Lights PID Proportional': Sending state 0.00000 % with 1 decimals of accuracy
+[11:17:03][D][sensor:094]: 'Enclosure Heating Lights PID Integral': Sending state 0.00000 % with 1 decimals of accuracy
+[11:17:03][D][sensor:094]: 'Enclosure Heating Lights PID Derivative': Sending state 0.00000 % with 1 decimals of accuracy
+[11:17:03][D][climate:378]: 'Enclosure Heating Lights Climate' - Sending state:
+[11:17:03][D][climate:381]:   Mode: HEAT
+[11:17:03][D][climate:383]:   Action: IDLE
+[11:17:03][D][climate:401]:   Current Temperature: nan°C
+[11:17:03][D][climate:407]:   Target Temperature: 0.00°C
+```
+
+Once you received this output. You can power off the `Raspberry Pi` and unplug the `AC` plug of the enclosure and install the `ESP32` back into the enclosure. Please note the orientation is EXTREMELY important and that the pins are correctly alligned. They should fit perfectly as there is the correct amount of pins.
+
+![ESP32 mounting orientation](https://github.com/e-dreyer/OpenEnclosure/blob/main/Images/esp_mounting_orientation.jpg?raw=true)
+
+### ESP Home Configuration Explanation
+
+In this section for interest sake the configuration for `ESP Home` will be explained, but is not necessary.
 
 A standard config file is used for the [ESP Home](https://esphome.io/) setup. This configuration requires the implementation of a `secrets.yaml` file which allows sensitive information to be hidden in the config file. The following sections are included in the configuration:
-
-### esphome
 
 [ESPHome Core config](https://esphome.io/components/esphome)
 
@@ -699,7 +821,7 @@ esphome:
       - light.turn_off: enclosure_heating_lights
 ```
 
-### board specific configuration
+#### board specific configuration
 
 The following section specifies the board used by the config and should be changed according to your board:
 
@@ -715,7 +837,7 @@ esp32:
     type: arduino
 ```
 
-### OTA
+#### OTA
 
 [ESPHome OTA](https://esphome.io/components/ota)
 
@@ -750,7 +872,7 @@ ota:
           args: ["x"]
 ```
 
-### Wi-Fi
+#### Wi-Fi
 
 [ESPHome Wi-Fi](https://esphome.io/components/wifi)
 
@@ -780,7 +902,7 @@ wifi:
 captive_portal:
 ```
 
-### MQTT
+#### MQTT
 
 [ESPHome MQTT](https://esphome.io/components/mqtt)
 
@@ -830,7 +952,7 @@ mqtt:
             return x["value"];
 ```
 
-### Climate Control
+#### Climate Control
 
 [ESPHome Climate](https://esphome.io/components/climate/)
 
@@ -868,7 +990,7 @@ climate:
       temperature_step: 1 °C
 ```
 
-### Sensors
+#### Sensors
 
 [ESPHome PID](https://esphome.io/components/climate/pid)
 
@@ -955,7 +1077,7 @@ sensor:
     accuracy_decimals: 2
 ```
 
-### OutputNETWORK
+#### OutputNETWORK
 
 [ESPHome AC Dimmer](https://esphome.io/components/output/ac_dimmer)
 
@@ -983,7 +1105,7 @@ output:
     zero_means_zero: true # A value of zero turns the PID off
 ```
 
-### Lights
+#### Lights
 
 [ESPHome Light](https://esphome.io/components/light/)
 [ESPHome Monochromatic Light](https://esphome.io/components/light/monochromatic)
@@ -1001,7 +1123,7 @@ light:
     output: enclosure_heating_lights_dimmer # Is controlled by the dimmer
 ```
 
-### Button
+#### Button
 
 [ESPHome Button](https://esphome.io/components/button/)
 
