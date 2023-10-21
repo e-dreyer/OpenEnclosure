@@ -68,10 +68,10 @@ wifi:
   password: !secret wifi_password
 
   # IP settings
-  # manual_ip:
-  #   static_ip: !secret wifi_ip
-  #   gateway: !secret wifi_gateway
-  #   subnet: !secret wifi_subnet
+  manual_ip:
+    static_ip: !secret wifi_ip
+    gateway: !secret wifi_gateway
+    subnet: !secret wifi_subnet
 
   # Wifi-fallback settings for access point
   ap:
