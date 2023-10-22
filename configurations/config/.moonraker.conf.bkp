@@ -1,18 +1,3 @@
-[update_manager octoeverywhere]
-type = git_repo
-channel = beta
-path = /home/erikd/octoeverywhere
-origin = https://github.com/QuinnDamerell/OctoPrint-OctoEverywhere.git
-env = /home/erikd/octoeverywhere-env/bin/python
-requirements = requirements.txt
-install_script = install.sh
-managed_services = 
-	octoeverywhere
-
-[announcements]
-subscriptions = 
-	octoeverywhere
-
 [octoprint_compat]
 
 [history]
@@ -22,7 +7,7 @@ subscriptions =
 [server]
 host = 0.0.0.0
 port = 7125
-klippy_uds_address = /home/erikd/printer_data/comms/klippy.sock
+klippy_uds_address = /home/pi/printer_data/comms/klippy.sock
 
 [mqtt]
 address = 0.0.0.0
@@ -90,16 +75,6 @@ path = ~/printer_data/config/klipper-macros
 primary_branch = main
 is_system_service = False
 managed_services = klipper
-
-[update_manager mobileraker]
-type = git_repo
-path = ~/mobileraker_companion
-origin = https://github.com/Clon1998/mobileraker_companion.git
-primary_branch = main
-managed_services = mobileraker
-env = ~/mobileraker-env/bin/python
-requirements = scripts/mobileraker-requirements.txt
-install_script = scripts/install-mobileraker-companion.sh
 
 [data_store]
 temperature_store_size = 1200
