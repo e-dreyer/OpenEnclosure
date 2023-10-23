@@ -2,7 +2,7 @@
 
 ## Important links and the structure of this guide
 
-- For the initial setup and only configuring the `WiFi` of the printer and enclosure, please follow this [guide](https://github.com/e-dreyer/OpenEnclosure/tree/main/intial_setup)
+- For the initial setup, construction and only configuring the `WiFi` of the printer and enclosure, please follow this [guide](https://github.com/e-dreyer/OpenEnclosure/tree/main/intial_setup)
 - For the original manual of the CR6-SE, please refer to this [PDF](https://github.com/e-dreyer/OpenEnclosure/tree/main/manual)
 - For all of the slicer configs and profiles please refer to the [Slicer Profiles](https://github.com/e-dreyer/OpenEnclosure/tree/main/slicer_profiles) section.
 
