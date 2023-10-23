@@ -1,9 +1,6 @@
 # OpenEnclosure
 
-This is my implementation for my 3D printing enclosure. Most configuration files use the extra `secrets.yaml` file functionality to define
-credentials used in this configuration.
-
-This enclosure runs the following software:
+This is my implementation for my 3D printing enclosure. The enclosure runs the following software:
 
 - **Klipper**: The `firmware` for the printer. [Klipper](https://www.klipper3d.org/) is installed on both the printer and the `Raspberry Pi`
 - **Mainsail**: The front-end for `Klipper`, which allows for a simple interface with the printer. You can find the official documentation [here](https://docs.mainsail.xyz/)
