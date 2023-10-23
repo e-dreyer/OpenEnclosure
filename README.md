@@ -1,5 +1,13 @@
 # OpenEnclosure
 
+## Important links and the structure of this guide
+
+- For the initial setup and only configuring the `WiFi` of the printer and enclosure, please follow this [guide](https://github.com/e-dreyer/OpenEnclosure/tree/main/intial_setup)
+- For the original manual of the CR6-SE, please refer to this [PDF](https://github.com/e-dreyer/OpenEnclosure/tree/main/manual)
+- For all of the slicer configs and profiles please refer to the [Slicer Profiles](https://github.com/e-dreyer/OpenEnclosure/tree/main/slicer_profiles) section.
+
+## System Architecture
+
 This is my implementation for my 3D printing enclosure. The enclosure runs the following software:
 
 - **Klipper**: The `firmware` for the printer. [Klipper](https://www.klipper3d.org/) is installed on both the printer and the `Raspberry Pi`
@@ -10,7 +18,9 @@ This is my implementation for my 3D printing enclosure. The enclosure runs the f
 
 ## Fresh Install
 
-This section is only relevant if the user wishes to do a complete fresh installation of the entire system. This could be necessary if they user bricked the system in some way, which is not easily possible, they wish to reproduce the original system or wish to replicate it and create a new system. It is advised that a user reads the entire installation process for better understanding. This process might appear intimidating, but is actually quite simple and can easily be completed in about an hour of simply typing `Linux` terminal commands.
+This section is only relevant if the user wishes to do a complete fresh installation of the entire system. If you wish to only configure the `WiFi` settings, please refer to this [guide](https://github.com/e-dreyer/OpenEnclosure/tree/main/intial_setup).
+
+This could be necessary if they user bricked the system in some way, which is not easily possible, they wish to reproduce the original system or wish to replicate it and create a new system. It is advised that a user reads the entire installation process for better understanding. This process might appear intimidating, but is actually quite simple and can easily be completed in about an hour of simply typing `Linux` terminal commands.
 
 An important thing to note is, when completing a fresh install, the `Raspberry Pi` will have no network connection initially. Thus, it is required to connect the `Raspberry Pi` to an external monitor with a keyboard and a `wireless dongle`. The fresh operating system `MainsailOS` will then be installed and the initial setup will be completed. Once the network configuration has been completed, the user can disconnect the `Raspberry Pi` from the external monitor and use `SSH` for further configuration.
 
