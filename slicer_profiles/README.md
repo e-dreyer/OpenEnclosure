@@ -36,6 +36,8 @@ _PRINT_START_PHASE_INIT EXTRUDER={first_layer_temperature[initial_tool]} BED=[fi
 
 This `G-code` initializes the print. It sets the temperature for the `EXTRUDER` and `BED`. Furthermore, it also specifies the `MESH_MIN` and `MESH_MAX`. This allows the slicer to tell the printer what the `min` and `max` dimensions of the print are. This is usefull for `adaptive mesh leveling`, which only levels the print for the area of the print. This greatly reduces leveling time and also allows the user to increase the resolution of the leveling, without requiring to `probe` the entire bed. `LAYERS` tells the printer how many layers there are and is used for `time estimates` and other fun features such as `GCODE AT LAYER` and other more advanced features such as color changes. Finally `NOZZLE_SIZE` tells `Klipper` what the size of the nozzle is and allows `Klipper` to perform more advanced compensation and flow control.
 
+`SET_ENCLOSURE_TEMPERATURE TARGET=50.0` could also be added to set the temperature for the enclosure. Where `50.0` can be changed to any other temperature. The max temperature for the enclosure is however restricted to `60.0` in the firmware to prevent overheating and for safety.
+
 The following section is used to specify the `printing surface` for `Klipper`:
 
 ```gcode
@@ -61,3 +63,14 @@ _PRINT_START_PHASE_PURGE
 ```
 
 The last segment is implement using an open-source library called `KlipperMacros`, users can read more about it [here](https://github.com/jschuh/klipper-macros). This is used to level the bed, probe and perform an initial purge, which is automatically calculated based of the aforementioned `MIN` and `MAX` mesh parameters.
+
+Finally, the following end `G-code` should be added in the `END Gcode` section:
+
+```gcode
+PRINT_END
+SET_ENCLOSURE_TEMPERATURE TARGET=0.0
+; total layers count = [total_layer_count]
+```
+
+Here `PRINT_END` tells the printer that the end of the print has been reached and `SET_ENCLOSURE_TEMPERATURE TARGET=0.0` tells the printer to ensure that the enclosure heater turns off.
+
