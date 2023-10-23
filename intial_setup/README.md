@@ -259,7 +259,7 @@ Note the orientation of the `ESP32` in the enclosure. Carefully disconnect it by
 
 ![ESP32 mounting orientation](https://github.com/e-dreyer/OpenEnclosure/blob/main/Images/esp_mounting_orientation.jpg?raw=true)
 
-Connect the `ESP32` with a `USB` cable to the `Raspberry Pi`. Preferably not the `USB` cable used to connect the printer, as it does not provide power to the `ESP32` and the red `LED` on the `ESP32` will not turn on when plugged in:
+Connect the `ESP32` with a `USB` cable to the `Raspberry Pi`. Preferably not the `USB` cable used to connect the printer, as it does not provide power to the `ESP32` and the red `LED` on the `ESP32` will not turn on when plugged in. Rather use the extra included `USB` cable.
 
 ![ESP32 connected to printer](https://github.com/e-dreyer/OpenEnclosure/blob/main/Images/esp_connected_to_usb.jpg?raw=true)
 
